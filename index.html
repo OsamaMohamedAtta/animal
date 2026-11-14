@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رحلة في عالم الحيوانات</title>
+<style>
+:root{--ink:#263653;--purple:#7457c8;--pink:#ff8fab;--yellow:#ffd166;--mint:#8ee3c2;--paper:#fffdf8}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Tahoma,Arial,sans-serif;color:var(--ink);background:linear-gradient(135deg,#dff7ff,#f5e8ff 55%,#fff1d8);display:flex;align-items:center;justify-content:center;padding:20px}
+.app{width:min(920px,100%);background:var(--paper);border:5px solid #fff;border-radius:32px;box-shadow:0 18px 55px #4d4c7a25;overflow:hidden}
+.top{padding:22px 28px;background:linear-gradient(110deg,#7bdcb5,#8ed8f8);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-size:1.05rem;font-weight:bold}.stars{font-size:1.35rem;letter-spacing:4px}
+main{padding:clamp(20px,5vw,48px);text-align:center}
+h1{font-size:clamp(2rem,5vw,3.2rem);margin:8px 0 12px;color:#6548b5}
+.subtitle{font-size:1.12rem;line-height:1.8;margin:0 auto 24px;max-width:620px}
+.hero{font-size:clamp(4rem,12vw,7rem);margin:10px 0;filter:drop-shadow(0 8px 4px #00000012)}
+button{font:inherit;cursor:pointer;border:0;border-radius:18px;padding:14px 24px;font-weight:bold;transition:.18s transform,.18s filter}
+button:hover{transform:translateY(-3px);filter:brightness(1.03)}
+button:focus-visible{outline:4px solid #263653;outline-offset:3px}
+.primary{background:var(--purple);color:white;box-shadow:0 6px 0 #4e3995;font-size:1.1rem}
+.progress-row{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px;font-weight:bold}
+.track{height:13px;background:#eee9fa;border-radius:20px;overflow:hidden;margin-bottom:28px}
+.fill{height:100%;width:0;background:linear-gradient(90deg,#8ee3c2,#6bc6ed);transition:width .3s}
+.question-emoji{font-size:5rem;margin:8px 0}
+.question{font-size:clamp(1.35rem,4vw,2rem);line-height:1.6;margin:8px 0 24px}
+.answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:650px;margin:0 auto}
+.answer{background:#f1edff;color:#43356f;border:3px solid transparent;min-height:76px;font-size:1.12rem}
+.answer:nth-child(2){background:#e4f8f0}.answer:nth-child(3){background:#fff2d8}.answer:nth-child(4){background:#ffeaf0}
+.answer.correct{border-color:#27ae76;background:#d9f8e9}.answer.wrong{border-color:#ef6a78;background:#ffe1e5}
+.answer:disabled{cursor:default;opacity:1}
+.feedback{min-height:58px;margin:20px 0 8px;font-size:1.15rem;font-weight:bold;line-height:1.6}
+.next{display:none;background:var(--yellow);color:#5b4513;box-shadow:0 5px 0 #d5a83e}
+.result-emoji{font-size:6rem;margin:12px}
+.score{font-size:2rem;color:#6548b5;font-weight:bold;margin:12px}
+.hidden{display:none!important}
+.footer{padding:14px;text-align:center;background:#f7f3ff;color:#766b91;font-size:.9rem}
+@media(max-width:560px){body{padding:10px}.app{border-radius:23px}.top{padding:16px 20px}.answers{grid-template-columns:1fr}.answer{min-height:64px}main{padding:22px 18px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top"><div class="brand">🌿 نادي المستكشفين الصغار</div><div class="stars">⭐ 🐾 ⭐</div></header>
+  <main>
+    <section id="start">
+      <div class="hero">🦁 🐘 🦒</div>
+      <h1>رحلة في عالم الحيوانات</h1>
+      <p class="subtitle">استعد لمغامرة ممتعة! هنتعرف على الحيوانات وأصواتها وأماكن عيشها. اختار الإجابة الصحيحة واجمع النجوم! 🌟</p>
+      <button class="primary" id="startBtn">ابدأ المغامرة 🚀</button>
+    </section>
+    <section id="game" class="hidden">
+      <div class="progress-row"><span id="counter">السؤال 1 من 10</span><span id="scoreLabel">⭐ 0</span></div>
+      <div class="track"><div class="fill" id="progress"></div></div>
+      <div class="question-emoji" id="animal">🐱</div>
+      <h2 class="question" id="question">أي حيوان يقول: مواء؟</h2>
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+      <button class="next" id="nextBtn">السؤال التالي ←</button>
+    </section>
+    <section id="result" class="hidden">
+      <div class="result-emoji" id="resultEmoji">🏆</div>
+      <h1>أحسنت يا بطل!</h1>
+      <p class="subtitle" id="resultText">لقد أنهيت الرحلة بنجاح.</p>
+      <div class="score" id="finalScore">0 من 10 ⭐</div>
+      <p class="subtitle" id="encourage">استمر في التعلم والاكتشاف!</p>
+      <button class="primary" id="againBtn">العب مرة أخرى 🔄</button>
+    </section>
+  </main>
+  <div class="footer">صُممت للتعلم والمرح للأطفال 💛</div>
+</div>
+<script>
+const questions = [
+ {e:"🐱",q:"أي حيوان يقول: مواء؟",a:["القطة","البقرة","الحصان","البطة"],c:0,why:"رائع! القطة تقول مواء."},
+ {e:"🦒",q:"أي حيوان له رقبة طويلة جدًا؟",a:["الأرنب","الزرافة","القرد","الدب"],c:1,why:"أحسنت! الزرافة مشهورة برقبتها الطويلة."},
+ {e:"🐘",q:"ما اسم الحيوان الذي له خرطوم طويل؟",a:["الأسد","الحمار الوحشي","الفيل","الثعلب"],c:2,why:"إجابة صحيحة! الفيل يستخدم خرطومه في أشياء كثيرة."},
+ {e:"🐄",q:"أي حيوان يعطينا اللبن؟",a:["البقرة","الذئب","النمر","التمساح"],c:0,why:"ممتاز! البقرة من الحيوانات التي تعطينا اللبن."},
+ {e:"🐪",q:"أين يعيش الجمل غالبًا؟",a:["في البحر","في الصحراء","في القطب","في الغابة"],c:1,why:"صحيح! الجمل يستطيع التكيف مع حياة الصحراء."},
+ {e:"🐟",q:"أين تعيش الأسماك؟",a:["على الأشجار","في الرمال","في الماء","في العش"],c:2,why:"برافو! الأسماك تعيش في الماء."},
+ {e:"🐰",q:"أي حيوان يحب أكل الجزر؟",a:["الأرنب","الأسد","الحوت","الدجاجة"],c:0,why:"أحسنت! الأرنب يحب الخضروات مثل الجزر."},
+ {e:"🦁",q:"ما الحيوان الذي يُلقب بملك الغابة؟",a:["الفأر","الأسد","السلحفاة","الببغاء"],c:1,why:"رائع! الأسد يُلقب بملك الغابة."},
+ {e:"🐧",q:"أي طائر لا يطير ويجيد السباحة؟",a:["العصفور","النسر","البطريق","الحمامة"],c:2,why:"إجابة ممتازة! البطريق لا يطير لكنه سبّاح ماهر."},
+ {e:"🐢",q:"أي حيوان يحمل بيته على ظهره؟",a:["السلحفاة","القط","الحصان","الزرافة"],c:0,why:"أحسنت جدًا! السلحفاة لها صدفة تحمي جسمها."}
+];
+let index=0,score=0,locked=false;
+const $=id=>document.getElementById(id);
+function show(id){["start","game","result"].forEach(s=>$(s).classList.toggle("hidden",s!==id))}
+function start(){index=0;score=0;show("game");render()}
+function render(){
+ locked=false;const item=questions[index];
+ $("counter").textContent=`السؤال ${index+1} من ${questions.length}`;
+ $("scoreLabel").textContent=`⭐ ${score}`;
+ $("progress").style.width=`${index/questions.length*100}%`;
+ $("animal").textContent=item.e;$("question").textContent=item.q;
+ $("feedback").textContent="";$("nextBtn").style.display="none";
+ $("answers").innerHTML="";
+ item.a.forEach((answer,i)=>{const b=document.createElement("button");b.className="answer";b.textContent=answer;b.addEventListener("click",()=>choose(i,b));$("answers").appendChild(b)});
+}
+function choose(choice,button){
+ if(locked)return;locked=true;const item=questions[index];const buttons=[...$("answers").children];
+ buttons.forEach((b,i)=>{b.disabled=true;if(i===item.c)b.classList.add("correct")});
+ if(choice===item.c){score++;$("feedback").textContent="🎉 "+item.why}
+ else{$("feedback").textContent="💛 محاولة جميلة! الإجابة الصحيحة هي: "+item.a[item.c]}
+ $("scoreLabel").textContent=`⭐ ${score}`;$("progress").style.width=`${(index+1)/questions.length*100}%`;
+ $("nextBtn").style.display="inline-block";$("nextBtn").textContent=index===questions.length-1?"عرض النتيجة 🏆":"السؤال التالي ←";
+}
+function next(){if(!locked)return;index++;if(index<questions.length)render();else finish()}
+function finish(){
+ show("result");$("finalScore").textContent=`${score} من ${questions.length} ⭐`;
+ $("resultEmoji").textContent=score>=8?"🏆":score>=5?"🌟":"🌈";
+ $("resultText").textContent=`أجبت إجابة صحيحة عن ${score} أسئلة من أصل ${questions.length}.`;
+ $("encourage").textContent=score>=8?"مذهل! أنت مستكشف رائع للحيوانات!":score>=5?"عمل جميل! ومع كل مرة ستتعلم أكثر.":"أحسنت المحاولة! هيا نلعب مرة أخرى ونتعلم معًا.";
+}
+$("startBtn").addEventListener("click",start);$("nextBtn").addEventListener("click",next);$("againBtn").addEventListener("click",start);
+</script>
+</body>
+</html>
